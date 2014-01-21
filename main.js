@@ -34,5 +34,5 @@ $(function() {
 
 	}
 
-	loadStreetViewWithLatLng(37.775002, -122.418297);
+	loadStreetViewWithLatLng(37.775732, -122.413985);
 });
