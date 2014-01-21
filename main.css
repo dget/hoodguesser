@@ -1,0 +1,16 @@
+html, body {
+	height: 100%;
+}
+#streetview {
+	background-color: chartreuse;
+	height: 100%;
+	width: 60%;
+	float: left;
+}
+
+#input-area {
+	background-color: OldLace;
+	height: 100%;
+	width: 40%;
+	float: right;
+}
