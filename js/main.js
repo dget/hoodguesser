@@ -1,5 +1,6 @@
 $(function() {
 	var initialize = function() {
+		// TODO: check browser compatibility
 
 	}
 
@@ -34,5 +35,7 @@ $(function() {
 
 	}
 
+	initialize();
 	loadStreetViewWithLatLng(37.775732, -122.413985);
+
 });
