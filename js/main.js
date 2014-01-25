@@ -285,7 +285,7 @@ $(function() {
 
 	initialize();
 	createSvg();
-	loadData(everythingLoaded)
+	loadData(everythingLoaded);
 	loadStreetViewWithLatLng(37.775732, -122.413985);
 
 });
