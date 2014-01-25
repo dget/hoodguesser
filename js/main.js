@@ -76,7 +76,6 @@ $(function() {
 	}
 
 	var createSvg = function() {
- 		console.log("HIIII");
 		updateCanvasSize();
 
 		mapSvg = d3.select('#svg-container').append('svg')
@@ -126,7 +125,6 @@ $(function() {
 				var el = d3.event.target || d3.event.toElement;
 				el.classList.remove('hover');
 			})
-		console.log(geoData);
 	}
 
 	function findBoundaries() {
@@ -161,7 +159,8 @@ $(function() {
 	  }
 
 	  for (var i in geoData.features) {
-//	    if (CITY_DATA[cityId].pointsInsteadOfPolygons) {
+	  	// TODO: update this to properly handle many cities
+		// if (CITY_DATA[cityId].pointsInsteadOfPolygons) {
 		if (false) {
 	      var lon = geoData.features[i].geometry.coordinates[0]
 	      var lat = geoData.features[i].geometry.coordinates[1];
@@ -234,7 +233,8 @@ $(function() {
 		latSpread = boundaries.maxLat - boundaries.minLat;
 		lonSpread = boundaries.maxLon - boundaries.minLon;
 
-//		if (CITY_DATA[cityId].pointsInsteadOfPolygons) {
+	  	// TODO: update this to properly handle many cities
+		// if (CITY_DATA[cityId].pointsInsteadOfPolygons) {
 		if (false) {
 		  latSpread *= 1.1;      
 		  lonSpread *= 1.1;      
@@ -276,7 +276,7 @@ $(function() {
 
 		geoMapPath = d3.geo.path().projection(projection);
 		}
-		}
+	}
 
 	var everythingLoaded = function() {
 		calculateMapSize();
