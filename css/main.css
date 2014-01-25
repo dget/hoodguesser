@@ -18,3 +18,7 @@ html, body {
 #map {
     height: 80%;
 }
+
+.neighborhood.hover {
+    fill: blue;
+}

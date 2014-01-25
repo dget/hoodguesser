@@ -18,7 +18,7 @@ $(function() {
 	}
 
 	var getNeighborhoodFromLatLng = function(lat, lng) {
-		return "SOMA";
+		return "South of Market";
 	}
 
 	var loadStreetViewWithLatLng = function(lat, lng) {
@@ -99,6 +99,11 @@ $(function() {
 		});
 	}
 
+	function sanitizeName(name) {
+		name = name.replace(/[\n\r]/g, '');
+		return name;
+	}
+
 	var createMap = function() {
 		var mapContents = mapSvg
 			.selectAll('path')
@@ -106,7 +111,21 @@ $(function() {
 			.enter()
 			.append('path')
 			.attr('d', geoMapPath.pointRadius(1))
-			.attr('class', 'neighborhood unguessed');
+			.attr('class', 'neighborhood unguessed')
+			.attr('name', function(d) { return sanitizeName(d.properties.name);})
+			.on('click', function(d) {
+				var el = d3.event.target || d3.event.toElement;
+				var neighborhoodChosen = el.attributes.name.value;
+				alert(neighborhoodChosen);
+			})
+			.on('mouseover', function(d) {
+				var el = d3.event.target || d3.event.toElement;
+				el.classList.add('hover');
+			})
+			.on('mouseout', function(d) {
+				var el = d3.event.target || d3.event.toElement;
+				el.classList.remove('hover');
+			})
 		console.log(geoData);
 	}
 
