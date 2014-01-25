@@ -252,51 +252,6 @@ $(function() {
 		    ((D3_DEFAULT_SCALE * 180) / latSpread * (mapHeight - 50)) / 
 		        MAPS_DEFAULT_SCALE / 0.045 * (-latStep);
 
-		// TODO this shouldn’t be hardcoded, but it is. Sue me.
-/*
-		switch (cityId) {
-		  case 'africa':
-		    globalScale *= .8;
-		    break;
-		  case 'alaska-ipla':
-		    globalScale *= .8;
-		    break;
-		  case 'south-america':
-		    globalScale *= .88;
-		    centerLat -= 5;
-		    break;
-		  case 'europe':
-		    globalScale *= .85;
-		    centerLat += 6;
-		    break;
-		  case 'russia':
-		    globalScale *= .8;
-		    centerLat += 6;
-		    break;
-		  case 'asia':
-		    globalScale *= .7;
-		    centerLat += 20;
-		    break;
-		  case 'europe-1914':
-		    // To match contemporary Europe above
-		    globalScale *= 1.0915321079;
-		    centerLat = 55.444707;
-		    centerLon = 5.8151245;
-		    break;
-		  case 'europe-1938': 
-		    // To match contemporary Europe above
-		    globalScale *= 1.0915321079;
-		    centerLat = 55.444707;
-		    centerLon = 5.8151245;
-		    break;
-		  case 'oceania':
-		    globalScale *= .8;
-		    break;
-		  case 'world':
-		    globalScale *= .6;
-		    break;
-		}
-*/
 		// Calculate width according to that scale
 		var width = globalScale / (D3_DEFAULT_SCALE * 360) * 
 		    lonSpread * MAPS_DEFAULT_SCALE;
