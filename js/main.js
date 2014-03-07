@@ -50,6 +50,8 @@ $(function() {
 
 	// TODO: handle resizing
 	// TODO: loading progress
+	// TODO: somewhere, remove small neighborhoods
+	//
 
 	// constants
 	var MAP_SELECTOR = "#map";
@@ -57,8 +59,16 @@ $(function() {
 	var MAPS_DEFAULT_SCALE = 512;
 	var MAP_BACKGROUND_DEFAULT_ZOOM = 12;
 
+	var MAP_BACKGROUND_SIZE_THRESHOLD = (128 + 256) / 2;
+	var MAP_BACKGROUND_DEFAULT_ZOOM = 12;
+	var MAP_BACKGROUND_MAX_ZOOM_NON_US = 12;
+	var MAP_BACKGROUND_MAX_ZOOM_US = 17;
+
+
 	var MAP_HORIZONTAL_OFFSET_NORMAL = 0;
 	var MAP_HORIZONTAL_OFFSET_REVERSED = 1;
+
+	var MAPBOX_MAP_ID = 'codeforamerica.h4ghhj23';
 
 	// variables
 	var geoData; // geoJSON info about the city
@@ -73,6 +83,7 @@ $(function() {
 	var updateCanvasSize = function() {
 		mapWidth = $(MAP_SELECTOR).width();
 		mapHeight = $(MAP_SELECTOR).height();
+		console.log(mapWidth, mapHeight);
 	}
 
 	var createSvg = function() {
@@ -222,7 +233,7 @@ $(function() {
 		    translate([256 + 512 + 213 - 88 + (mapWidth % 640) / 2 - 621 / 2, 256]));
 		} else {
 		var boundaries = findBoundaries();
-
+		console.log("boundaries: ", boundaries);
 		if ((boundaries.minLon == -180) && (boundaries.maxLon == 180)) {
 		  mapHorizontalOffset = MAP_HORIZONTAL_OFFSET_REVERSED;
 		  boundaries = findBoundaries();
@@ -278,8 +289,82 @@ $(function() {
 		}
 	}
 
+	function prepareMapBackground() {
+		updateCanvasSize();
+
+		// TODO this is the worst line of code ever written
+  		var size = globalScale * 0.0012238683395795992 * 0.995 / 2 * 0.800 / 2 / 4;
+		console.log("global scale", globalScale);
+		console.log("size", size);
+
+		var zoom = MAP_BACKGROUND_DEFAULT_ZOOM + 2;
+
+		while (size < MAP_BACKGROUND_SIZE_THRESHOLD) {
+			size *= 2;
+			zoom--;
+		} 
+
+
+		 // TODO resize properly instead of recreating every single time
+		document.querySelector('#maps-background').innerHTML = '';
+
+		var map = 
+		  	L.mapbox.map('maps-background', MAPBOX_MAP_ID);
+
+		/*
+		if (pixelRatio == 2) {
+			zoom++;
+		}
+		*/
+		// US cities have states and no country, but some world cities have states
+		// yet also want to match all US national maps which have no states
+
+		/*
+		if ((CITY_DATA[cityId].stateName && !CITY_DATA[cityId].countryName) ||
+		  	(CITY_DATA[cityId].countryName && CITY_DATA[cityId].countryName == COUNTRY_NAME_USA)) {*/
+			var maxZoomLevel = MAP_BACKGROUND_MAX_ZOOM_US;
+			/*
+		} else {
+		var maxZoomLevel = MAP_BACKGROUND_MAX_ZOOM_NON_US;
+		}*/
+			
+		while (zoom > maxZoomLevel) {
+			zoom--;
+			size *= 2;
+		}
+
+		map.tileSize = { x: Math.round(size/* / pixelRatio*/), 
+						 y: Math.round(size/* / pixelRatio*/) };
+
+		var tile = latToTile(centerLat, zoom);
+		var longStep = 
+		  	(tileToLon(1, zoom) - tileToLon(0, zoom)) / 256 * 128;
+		var latStep = 
+		  	(tileToLat(tile + 1, zoom) - tileToLat(tile, zoom)) / 256 * 128;
+
+		var lat = centerLat;
+		var lon = centerLon;
+
+		var leftMargin = 0/*BODY_MARGIN * 2 + HEADER_WIDTH*/;
+
+		var ratio = leftMargin / map.tileSize.x;
+
+		lon -= ratio * longStep;
+
+		map.setView([lat, lon], zoom);
+	}
+
+	var onResize = function() {
+		calculateMapSize();
+		prepareMapBackground();
+
+		mapSvg.attr('width', mapWidth);
+		mapSvg.attr('height', mapHeight);
+	}
+
 	var everythingLoaded = function() {
 		calculateMapSize();
+		prepareMapBackground();
 		createMap();
 	}
 
