@@ -16,7 +16,9 @@ html, body {
 }
 
 #map {
-    height: 80%;
+    height: 100%;
+    position: relative;
+    cursor: default;
 }
 
 .neighborhood.hover {
