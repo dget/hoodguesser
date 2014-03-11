@@ -138,8 +138,14 @@ $(function() {
                 })
                 .on('click', function() {
                     var name = feature.properties.name;
-
-                    alert(name);
+                    
+                    if (name == correctNeighborhood) {
+                        alert("You got it! Good job.")
+                        window.location.reload();
+                    } else {
+                        alert("Sorry :(. It was " + correctNeighborhood + ", not " + name + ".");
+                        window.location.reload();
+                    }
                 });
             },
             style: function() {
@@ -154,5 +160,28 @@ $(function() {
 
     });
 
-    loadStreetViewWithLatLng(37.775732, -122.413985);
+    // TODO: catch bad locations
+    neighborhood_pts = {
+        'North Beach': [{'lat': 37.801193, 'lng': -122.410952}],
+        'Russian Hill': [{'lat': 37.799155, 'lng': -122.419091}],
+        'Marina': [{'lat': 37.806334, 'lng': -122.437492}],
+        'Seacliff': [{'lat': 37.788677, 'lng': -122.488052}],
+        'Bayview': [{'lat': 37.739317, 'lng': -122.390312}],
+        'Visitacion Valley': [{'lat': 37.713104, 'lng': -122.413386}],
+        'Excelsior': [{'lat': 37.725024, 'lng': -122.434545}],
+        'Bernal Heights': [{'lat': 37.742885, 'lng': -122.409361}],
+        'Mission': [{'lat': 37.755988, 'lng': -122.418826}],
+        'Noe Valley': [{'lat': 37.751383, 'lng': -122.432719}],
+        'Castro/Upper Market': [{'lat': 37.760059, 'lng': -122.434908}],
+        'Potrero Hill': [{'lat': 37.759623, 'lng': -122.403061}],
+        'South of Market': [{'lat': 37.777528, 'lng': -122.413098}]
+    }
+    neighborhoods = Object.keys(neighborhood_pts);
+
+    correctNeighborhood = neighborhoods[Math.floor(Math.random() * neighborhoods.length)];
+    sampleLocation = neighborhood_pts[correctNeighborhood][0];
+//    correctNeighborhood = sampleLocation['neighborhood']; /*getNeighborhoodFromLatLng(sampleLocation['lat'], sampleLocation['lng']);*/
+    console.log(correctNeighborhood);
+    loadStreetViewWithLatLng(sampleLocation['lat'], sampleLocation['lng']);
 });
+
