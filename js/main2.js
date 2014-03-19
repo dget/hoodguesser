@@ -2,7 +2,7 @@ $(function() {
 
     var initialize = function() {
         // TODO: check browser compatibility
-        // TODO: figure out how we're handling touch... 
+        // TODO: figure out how we're handling touch...
         //setTouchActive(Modernizr.touch);
 
 
@@ -32,7 +32,10 @@ $(function() {
             pov: {
                 heading: 45,
                 pitch: 10
-            }
+            },
+            addressControl: false,
+            linksControl: false,
+            panControl: false
         };
 
         var panorama = new google.maps.StreetViewPanorama(document.getElementById("streetview"), panoramaOptions);
@@ -81,7 +84,7 @@ $(function() {
         for (var i in geoData.features) {
             for (var z in geoData.features[i].geometry.coordinates) {
                 for (var j in geoData.features[i].geometry.coordinates[z]) {
-                    if (geoData.features[i].geometry.coordinates[z][j].length && 
+                    if (geoData.features[i].geometry.coordinates[z][j].length &&
                       typeof geoData.features[i].geometry.coordinates[z][j][0] != 'number') {
                         for (var k in geoData.features[i].geometry.coordinates[z][j]) {
                             var lon = geoData.features[i].geometry.coordinates[z][j][k][0];
@@ -107,7 +110,7 @@ $(function() {
         var url = 'data/san-francisco.geojson';
         $.ajax({
             dataType: 'json',
-            url: url, 
+            url: url,
             success: function(data) {
                 geoData = data;
                 callback(data);
@@ -138,7 +141,7 @@ $(function() {
                 })
                 .on('click', function() {
                     var name = feature.properties.name;
-                    
+
                     if (name == correctNeighborhood) {
                         alert("You got it! Good job.")
                         window.location.reload();
@@ -184,4 +187,3 @@ $(function() {
     console.log(correctNeighborhood);
     loadStreetViewWithLatLng(sampleLocation['lat'], sampleLocation['lng']);
 });
-
