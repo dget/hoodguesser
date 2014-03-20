@@ -1,376 +1,159 @@
 $(function() {
-	// Constants
 
+    var loadStreetViewWithLatLng = function(lat, lng) {
+        var latLng = new google.maps.LatLng(lat, lng);
 
-	var initialize = function() {
-		// TODO: check browser compatibility
-		// TODO: figure out how we're handling touch... 
-		//setTouchActive(Modernizr.touch);
-
-
-	}
-
-	var getNewLocation = function() {
-		return {
-			'lat': 37.775002,
-			'lng': -122.418297
-		};
-	}
-
-	var getNeighborhoodFromLatLng = function(lat, lng) {
-		return "South of Market";
-	}
-
-	var loadStreetViewWithLatLng = function(lat, lng) {
-		var latLng = new google.maps.LatLng(lat, lng);
-
-		var mapOptions = {
-          	center: latLng,
-          	zoom: 8
+        var mapOptions = {
+            center: latLng,
+            zoom: 8
         };
 
         var panoramaOptions = {
-  			position: latLng,
-  			pov: {
-    			heading: 45,
-    			pitch: 10
-  			}
-		};
+            position: latLng,
+            pov: {
+                heading: 45,
+                pitch: 10
+            },
+            addressControl: false,
+            linksControl: false,
+            panControl: false
+        };
 
-		var panorama = new google.maps.StreetViewPanorama(document.getElementById("streetview"), panoramaOptions);
+        var panorama = new google.maps.StreetViewPanorama(document.getElementById("streetview"), panoramaOptions);
+    }
 
-	}
+    // BEGIN map code
+    var MAPBOX_MAP_ID = 'codeforamerica.h4ghhj23';
 
-	// BEGIN choosing-map code
-	/*
-	 * Adapted from front-end code written (mostly) by Marcin Wichary, Code for America
-	 * as part of Click That 'Hood (https://github.com/codeforamerica/click_that_hood)
-	 */
+    var map = L.mapbox.map('map', MAPBOX_MAP_ID, {zoomControl: false});
+    map.dragging.disable();
+    map.touchZoom.disable();
+    map.doubleClickZoom.disable();
+    map.scrollWheelZoom.disable();
 
+    if (map.tap) {
+        map.tap.disable();
+    }
 
-	// TODO: handle resizing
-	// TODO: loading progress
-	// TODO: somewhere, remove small neighborhoods
-	//
+    // source: adapted from Click That Hood
+    // Finds the boundaries of the map containing geoData
+    function findBoundaries(geoData) {
 
-	// constants
-	var MAP_SELECTOR = "#map";
-	var D3_DEFAULT_SCALE = 500;
-	var MAPS_DEFAULT_SCALE = 512;
-	var MAP_BACKGROUND_DEFAULT_ZOOM = 12;
+        // TODO const
+        var minLat = 99999999;
+        var maxLat = -99999999;
+        var minLon = 99999999;
+        var maxLon = -99999999;
 
-	var MAP_BACKGROUND_SIZE_THRESHOLD = (128 + 256) / 2;
-	var MAP_BACKGROUND_DEFAULT_ZOOM = 12;
-	var MAP_BACKGROUND_MAX_ZOOM_NON_US = 12;
-	var MAP_BACKGROUND_MAX_ZOOM_US = 17;
+        // TODO move outside
+        function findMinMax(lon, lat) {
+            if (lat > maxLat) {
+                maxLat = lat;
+            }
+            if (lat < minLat) {
+                minLat = lat;
+            }
 
+            if (lon > maxLon) {
+                maxLon = lon;
+            }
+            if (lon < minLon) {
+                minLon = lon;
+            }
+        }
 
-	var MAP_HORIZONTAL_OFFSET_NORMAL = 0;
-	var MAP_HORIZONTAL_OFFSET_REVERSED = 1;
+        for (var i in geoData.features) {
+            for (var z in geoData.features[i].geometry.coordinates) {
+                for (var j in geoData.features[i].geometry.coordinates[z]) {
+                    if (geoData.features[i].geometry.coordinates[z][j].length &&
+                      typeof geoData.features[i].geometry.coordinates[z][j][0] != 'number') {
+                        for (var k in geoData.features[i].geometry.coordinates[z][j]) {
+                            var lon = geoData.features[i].geometry.coordinates[z][j][k][0];
+                            var lat = geoData.features[i].geometry.coordinates[z][j][k][1];
 
-	var MAPBOX_MAP_ID = 'codeforamerica.h4ghhj23';
+                            findMinMax(lon, lat);
+                        }
+                    } else if (geoData.features[i].geometry.coordinates[z][j].length) {
+                        var lon = geoData.features[i].geometry.coordinates[z][j][0];
+                        var lat = geoData.features[i].geometry.coordinates[z][j][1];
 
-	// variables
-	var geoData; // geoJSON info about the city
-	var mapSvg; // refers to svg element from d3
-	var geoMapPath; 
-	var mapWidth;
-	var mapHeight;
-	var mainMenu = false; // are we at the main menu?
-	var mapHorizontalOffset = MAP_HORIZONTAL_OFFSET_NORMAL;
+                    findMinMax(lon, lat);
+                    }
+                }
+            }
+        }
 
-	// functions
-	var updateCanvasSize = function() {
-		mapWidth = $(MAP_SELECTOR).width();
-		mapHeight = $(MAP_SELECTOR).height();
-		console.log(mapWidth, mapHeight);
-	}
+        return [[minLat, minLon],
+                [maxLat, maxLon]];
+    }
 
-	var createSvg = function() {
-		updateCanvasSize();
+    var loadData = function(callback) {
+        var url = 'data/san-francisco.geojson';
+        $.ajax({
+            dataType: 'json',
+            url: url,
+            success: function(data) {
+                geoData = data;
+                callback(data);
+            },
+            error: function() {
+                    // TODO: handle this error
+                }
+            });
+    }
 
-		mapSvg = d3.select('#svg-container').append('svg')
-      		.attr('width', mapWidth)
- 		    .attr('height', mapHeight);  
-	}
+    loadData(function (data) {
+        boundaries = findBoundaries(data);
 
-	var loadData = function(callback) {
-		var url = 'data/san-francisco.geojson';
-		$.ajax({
-			dataType: 'json',
-			url: url, 
-			success: function(data) {
-				geoData = data;
-				callback(data);
-			},
-			error: function() {
-				// TODO: handle this error
-			}
-		});
-	}
+        console.log(boundaries);
 
-	function sanitizeName(name) {
-		name = name.replace(/[\n\r]/g, '');
-		return name;
-	}
+        var neighborhoodLayer = L.geoJson(data, {
+            onEachFeature: function(feature, layer) {
+                layer.on('mouseover', function() {
+                    layer.setStyle({
+                        fillColor: 'black'
+                    });
 
-	var createMap = function() {
-		var mapContents = mapSvg
-			.selectAll('path')
-			.data(geoData.features)
-			.enter()
-			.append('path')
-			.attr('d', geoMapPath.pointRadius(1))
-			.attr('class', 'neighborhood unguessed')
-			.attr('name', function(d) { return sanitizeName(d.properties.name);})
-			.on('click', function(d) {
-				var el = d3.event.target || d3.event.toElement;
-				var neighborhoodChosen = el.attributes.name.value;
-				alert(neighborhoodChosen);
-			})
-			.on('mouseover', function(d) {
-				var el = d3.event.target || d3.event.toElement;
-				el.classList.add('hover');
-			})
-			.on('mouseout', function(d) {
-				var el = d3.event.target || d3.event.toElement;
-				el.classList.remove('hover');
-			})
-	}
+                })
+                .on('mouseout', function() {
+                    layer.setStyle({
+                        fillColor: 'blue'
+                    })
+                })
+                .on('click', function() {
+                    var name = feature.properties.name;
 
-	function findBoundaries() {
-	  // TODO const
-	  var minLat = 99999999;
-	  var maxLat = -99999999;
-	  var minLon = 99999999;
-	  var maxLon = -99999999;
+                    if (name == correctNeighborhood) {
+                        alert("You got it! Good job.")
+                        window.location.reload();
+                    } else {
+                        alert("Sorry :(. It was " + correctNeighborhood + ", not " + name + ".");
+                        window.location.reload();
+                    }
+                });
+            },
+            style: function() {
+                return {
+                    weight: 2,
+                    opacity: 0.8,
+                    fillColor: 'blue'
+                }
+            }
+        }).addTo(map);
+        map.fitBounds(boundaries);
 
-	  // TODO move outside
-	  function findMinMax(lon, lat) {
-	    switch (mapHorizontalOffset) {
-	      case MAP_HORIZONTAL_OFFSET_REVERSED:
-	        lon += 360;
-	        lon %= 360;
-	        break;
-	    }
+    });
 
-	    if (lat > maxLat) {
-	      maxLat = lat;
-	    }
-	    if (lat < minLat) {
-	      minLat = lat;
-	    }
+    correctNeighborhood = null;
+    sampleLocation = null;
+    // TODO: catch bad locations
+    var points = [];
+    $.get('data/sf_pts.json', function(pts) {
+        sampleLocation = pts[Math.floor(Math.random() * pts.length)];
+        correctNeighborhood = sampleLocation['neighborhood'];
+        console.log(sampleLocation);
+        loadStreetViewWithLatLng(sampleLocation['lat'], sampleLocation['lng']);
+    })
 
-	    if (lon > maxLon) {
-	      maxLon = lon;
-	    }
-	    if (lon < minLon) {
-	      minLon = lon;
-	    }
-	  }
-
-	  for (var i in geoData.features) {
-	  	// TODO: update this to properly handle many cities
-		// if (CITY_DATA[cityId].pointsInsteadOfPolygons) {
-		if (false) {
-	      var lon = geoData.features[i].geometry.coordinates[0]
-	      var lat = geoData.features[i].geometry.coordinates[1];
-
-	      findMinMax(lon, lat);
-	    } else {
-	      for (var z in geoData.features[i].geometry.coordinates) {
-	        for (var j in geoData.features[i].geometry.coordinates[z]) {
-	          if (geoData.features[i].geometry.coordinates[z][j].length && 
-	              typeof geoData.features[i].geometry.coordinates[z][j][0] != 'number') {
-	            for (var k in geoData.features[i].geometry.coordinates[z][j]) {
-	              var lon = geoData.features[i].geometry.coordinates[z][j][k][0];
-	              var lat = geoData.features[i].geometry.coordinates[z][j][k][1];
-
-	              findMinMax(lon, lat);
-	            }
-	          } else if (geoData.features[i].geometry.coordinates[z][j].length) {
-	            var lon = geoData.features[i].geometry.coordinates[z][j][0];
-	            var lat = geoData.features[i].geometry.coordinates[z][j][1];
-
-	            findMinMax(lon, lat);
-	          }
-	        }
-	      }
-	    }
-	  }
-
-	  return { 
-	    minLat: minLat,
-	    maxLat: maxLat,
-	    minLon: minLon,
-	    maxLon: maxLon
-	  }
-	}
-
-	function lonToTile(lon, zoom) { 
-	  return Math.floor((lon + 180) / 360 * Math.pow(2, zoom));
-	}
-
-	function latToTile(lat, zoom) { 
-	  return Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 
-	      1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
-	}
-
-	function tileToLon(x, zoom) {
-	  return x / Math.pow(2, zoom) * 360 - 180;
-	}
-
-	function tileToLat(y, zoom) {
-	  var n = Math.PI - 2 * Math.PI * y / Math.pow(2, zoom);
-	  return 180 / Math.PI * Math.atan(.5 * (Math.exp(n) - Math.exp(-n)));
-	}
-
-	function calculateMapSize() {
-		if (mainMenu) {
-		geoMapPath = d3.geo.path().projection(
-		    d3.geo.mercator().center([0, 0]).
-		    scale(640 / 6.3).
-		    translate([256 + 512 + 213 - 88 + (mapWidth % 640) / 2 - 621 / 2, 256]));
-		} else {
-		var boundaries = findBoundaries();
-		console.log("boundaries: ", boundaries);
-		if ((boundaries.minLon == -180) && (boundaries.maxLon == 180)) {
-		  mapHorizontalOffset = MAP_HORIZONTAL_OFFSET_REVERSED;
-		  boundaries = findBoundaries();
-		}
-
-		centerLat = (boundaries.minLat + boundaries.maxLat) / 2;
-		centerLon = (boundaries.minLon + boundaries.maxLon) / 2;
-		latSpread = boundaries.maxLat - boundaries.minLat;
-		lonSpread = boundaries.maxLon - boundaries.minLon;
-
-	  	// TODO: update this to properly handle many cities
-		// if (CITY_DATA[cityId].pointsInsteadOfPolygons) {
-		if (false) {
-		  latSpread *= 1.1;      
-		  lonSpread *= 1.1;      
-		}
-
-		updateCanvasSize();
-
-		var zoom = MAP_BACKGROUND_DEFAULT_ZOOM;
-		var tile = latToTile(centerLat, zoom);
-		var latStep = (tileToLat(tile + 1, zoom) - tileToLat(tile, zoom));
-
-		// Calculate for height first
-		// TODO: not entirely sure where these magic numbers are coming from
-		globalScale = 
-		    ((D3_DEFAULT_SCALE * 180) / latSpread * (mapHeight - 50)) / 
-		        MAPS_DEFAULT_SCALE / 0.045 * (-latStep);
-
-		// Calculate width according to that scale
-		var width = globalScale / (D3_DEFAULT_SCALE * 360) * 
-		    lonSpread * MAPS_DEFAULT_SCALE;
-
-		if (width > mapWidth) {
-		  globalScale = ((D3_DEFAULT_SCALE * 360) / lonSpread * mapWidth) / 
-		      MAPS_DEFAULT_SCALE;
-		}
-
-		projection = d3.geo.mercator();
-		switch (mapHorizontalOffset) {
-		  case MAP_HORIZONTAL_OFFSET_NORMAL:
-		    projection = projection.center([centerLon, centerLat]);
-		    break;
-		  case MAP_HORIZONTAL_OFFSET_REVERSED:
-		    projection = projection.center([centerLon - 180, centerLat]).
-		        rotate([180, 0]);    
-		    break;
-		}
-		projection = projection.scale(globalScale / 6.3).
-		    translate([mapWidth / 2, mapHeight / 2]);
-
-		geoMapPath = d3.geo.path().projection(projection);
-		}
-	}
-
-	function prepareMapBackground() {
-		updateCanvasSize();
-
-		// TODO this is the worst line of code ever written
-  		var size = globalScale * 0.0012238683395795992 * 0.995 / 2 * 0.800 / 2 / 4;
-		console.log("global scale", globalScale);
-		console.log("size", size);
-
-		var zoom = MAP_BACKGROUND_DEFAULT_ZOOM + 2;
-
-		while (size < MAP_BACKGROUND_SIZE_THRESHOLD) {
-			size *= 2;
-			zoom--;
-		} 
-
-
-		 // TODO resize properly instead of recreating every single time
-		document.querySelector('#maps-background').innerHTML = '';
-
-		var map = 
-		  	L.mapbox.map('maps-background', MAPBOX_MAP_ID);
-
-		/*
-		if (pixelRatio == 2) {
-			zoom++;
-		}
-		*/
-		// US cities have states and no country, but some world cities have states
-		// yet also want to match all US national maps which have no states
-
-		/*
-		if ((CITY_DATA[cityId].stateName && !CITY_DATA[cityId].countryName) ||
-		  	(CITY_DATA[cityId].countryName && CITY_DATA[cityId].countryName == COUNTRY_NAME_USA)) {*/
-			var maxZoomLevel = MAP_BACKGROUND_MAX_ZOOM_US;
-			/*
-		} else {
-		var maxZoomLevel = MAP_BACKGROUND_MAX_ZOOM_NON_US;
-		}*/
-			
-		while (zoom > maxZoomLevel) {
-			zoom--;
-			size *= 2;
-		}
-
-		map.tileSize = { x: Math.round(size/* / pixelRatio*/), 
-						 y: Math.round(size/* / pixelRatio*/) };
-
-		var tile = latToTile(centerLat, zoom);
-		var longStep = 
-		  	(tileToLon(1, zoom) - tileToLon(0, zoom)) / 256 * 128;
-		var latStep = 
-		  	(tileToLat(tile + 1, zoom) - tileToLat(tile, zoom)) / 256 * 128;
-
-		var lat = centerLat;
-		var lon = centerLon;
-
-		var leftMargin = 0/*BODY_MARGIN * 2 + HEADER_WIDTH*/;
-
-		var ratio = leftMargin / map.tileSize.x;
-
-		lon -= ratio * longStep;
-
-		map.setView([lat, lon], zoom);
-	}
-
-	var onResize = function() {
-		calculateMapSize();
-		prepareMapBackground();
-
-		mapSvg.attr('width', mapWidth);
-		mapSvg.attr('height', mapHeight);
-	}
-
-	var everythingLoaded = function() {
-		calculateMapSize();
-		prepareMapBackground();
-		createMap();
-	}
-
-	initialize();
-	createSvg();
-	loadData(everythingLoaded);
-	loadStreetViewWithLatLng(37.775732, -122.413985);
 
 });
