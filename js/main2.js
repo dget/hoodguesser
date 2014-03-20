@@ -1,24 +1,5 @@
 $(function() {
 
-    var initialize = function() {
-        // TODO: check browser compatibility
-        // TODO: figure out how we're handling touch...
-        //setTouchActive(Modernizr.touch);
-
-
-    }
-
-    var getNewLocation = function() {
-        return {
-            'lat': 37.775002,
-            'lng': -122.418297
-        };
-    }
-
-    var getNeighborhoodFromLatLng = function(lat, lng) {
-        return "South of Market";
-    }
-
     var loadStreetViewWithLatLng = function(lat, lng) {
         var latLng = new google.maps.LatLng(lat, lng);
 
