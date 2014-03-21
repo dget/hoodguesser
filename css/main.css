@@ -1,5 +1,6 @@
 html, body {
 	height: 100%;
+	font-family: 'Montserrat', sans-serif;
 }
 #streetview {
 	background-color: chartreuse;
@@ -9,7 +10,6 @@ html, body {
 }
 
 #input-area {
-	background-color: OldLace;
 	height: 100%;
 	width: 40%;
 	float: right;
