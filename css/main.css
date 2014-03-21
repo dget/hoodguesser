@@ -2,11 +2,24 @@ html, body {
 	height: 100%;
 	font-family: 'Montserrat', sans-serif;
 }
+
+#logo {
+    position: absolute;
+    top: 5px;
+    left: 35px;
+    background-image: url('images/hg_logo.png');
+    background-repeat: no-repeat;
+    height: 68px;
+    width: 272px;
+    z-index: 99;
+}
+
 #streetview {
 	background-color: chartreuse;
 	height: 100%;
 	width: 60%;
 	float: left;
+    z-index: 1;
 }
 
 #input-area {
