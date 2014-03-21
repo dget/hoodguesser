@@ -121,10 +121,16 @@ $(function() {
 
         var neighborhoodLayer = L.geoJson(data, {
             onEachFeature: function(feature, layer) {
+                layer.bindPopup(feature.properties.name,
+                  { closeButton: false,
+                    offset: [0, 10],
+                    autoPan: false}
+                );
                 layer.on('mouseover', function() {
                     layer.setStyle({
                         fillColor: 'black'
                     });
+                    layer.openPopup();
 
                 })
                 .on('mouseout', function() {
