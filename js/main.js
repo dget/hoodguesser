@@ -1,5 +1,17 @@
 $(function() {
 
+    // Hide the welcome screen if you've seen it
+    if (window.location.hash == '') {
+      window.location.hash = "alreadyseen";
+    } else {
+      $('#welcome-screen').hide();
+    }
+
+    // Hide the welcome screen if you click the button
+    $('#welcome-screen button').click(function () {
+        $('#welcome-screen').hide();
+    })
+
     var loadStreetViewWithLatLng = function(lat, lng) {
         var latLng = new google.maps.LatLng(lat, lng);
 
