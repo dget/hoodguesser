@@ -133,13 +133,13 @@ $(function() {
                     })
                 })
                 .on('click', function() {
-                    var name = feature.properties.name;
+                    var guessedNeighborhood = feature.properties.name;
 
-                    if (name == correctNeighborhood) {
-                        alert("You got it! Good job.")
+                    if (guessedNeighborhood == correctNeighborhood) {
+                        alert("You got it! This is " + correctNeighborhood + ".")
                         window.location.reload();
                     } else {
-                        alert("Sorry :(. It was " + correctNeighborhood + ", not " + name + ".");
+                        alert("Oops! It was " + correctNeighborhood + ", not " + guessedNeighborhood + ".");
                         window.location.reload();
                     }
                 });
