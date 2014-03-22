@@ -26,6 +26,24 @@ html, body {
 	height: 100%;
 	width: 40%;
 	float: right;
+    z-index: 1;
+}
+
+#neighborhood-prompt {
+    position: absolute;
+    top: 10px;
+    right: 0px;
+    z-index: 99;
+}
+
+#neighborhood-prompt p {
+    background-color: #fff;
+    padding: 12px 30px;
+    color: #000;
+    font-size: 1.6em;
+    font-weight: bold;
+    max-height: 40px;
+    float: right;
 }
 
 #map {
