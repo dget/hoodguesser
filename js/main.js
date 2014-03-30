@@ -14,8 +14,8 @@ $(function() {
     var startGame = function() {
         setSplashScreenHandler();
         initializeMapBox();
-        loadNeighborhoodData(initializeNeighborhoodMapWithGeoJson);
-        loadPointsData(startNewRound);
+        loadNeighborhoodData(initializeNeighborhoodMapWithGeoJson, logError);
+        loadPointsData(startNewRound, logError);
     }
 
     var startNewRound = function () {
@@ -197,6 +197,10 @@ $(function() {
         alert("Oops! It was " + correctNeighborhood + ", not " + guessedNeighborhood + ".");
         startNewRound();
     };
+
+    var logError = function() {
+        console.error(arguments);
+    }
 
     startGame();
 });
