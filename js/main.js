@@ -173,7 +173,7 @@ $(function() {
                     if (guessedNeighborhood == correctNeighborhood) {
                         handleCorrectGuess(guessedNeighborhood, correctNeighborhood);
                     } else {
-                        handleInorrectGuess(guessedNeighborhood, correctNeighborhood);
+                        handleIncorrectGuess(guessedNeighborhood, correctNeighborhood);
                     }
                 });
             },
@@ -193,7 +193,7 @@ $(function() {
         startNewRound();
     };
 
-    var handleInorrectGuess = function(guessedNeighborhood, correctNeighborhood) {
+    var handleIncorrectGuess = function(guessedNeighborhood, correctNeighborhood) {
         alert("Oops! It was " + correctNeighborhood + ", not " + guessedNeighborhood + ".");
         startNewRound();
     };
