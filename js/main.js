@@ -1,16 +1,36 @@
 $(function() {
 
-    // Hide the welcome screen if you've seen it
-    if (window.location.hash == '') {
-      window.location.hash = "alreadyseen";
-    } else {
-      $('#welcome-screen').hide();
+    // global constants
+    var MAPBOX_MAP_ID = 'codeforamerica.h4ghhj23';
+
+    // global variables
+    var correctNeighborhood = null;
+    var sampleLocation = null;
+    var currentCity = 'san-francisco';
+    var map;
+    var boundaries;
+    var points;
+
+    var startGame = function() {
+        setSplashScreenHandler();
+        initializeMapBox();
+        loadNeighborhoodData(initializeNeighborhoodMapWithGeoJson);
+        loadPointsData(startNewRound);
     }
 
-    // Hide the welcome screen if you click the button
-    $('#welcome-screen button').click(function () {
-        $('#welcome-screen').hide();
-    })
+    var startNewRound = function () {
+        locationToShow = points[Math.floor(Math.random() * points.length)];
+        correctNeighborhood = locationToShow['neighborhood'];
+        loadStreetViewWithLatLng(locationToShow['lat'], locationToShow['lng']);
+    }
+
+
+    var setSplashScreenHandler = function() {
+        // Hide the welcome screen if you click the button
+        $('#welcome-screen button').click(function () {
+            $('#welcome-screen').hide();
+        });
+    }
 
     var loadStreetViewWithLatLng = function(lat, lng) {
         var latLng = new google.maps.LatLng(lat, lng);
@@ -35,21 +55,22 @@ $(function() {
     }
 
     // BEGIN map code
-    var MAPBOX_MAP_ID = 'codeforamerica.h4ghhj23';
+    var initializeMapBox = function() {
+        map = L.mapbox.map('map', MAPBOX_MAP_ID, {zoomControl: false});
+        map.dragging.disable();
+        map.touchZoom.disable();
+        map.doubleClickZoom.disable();
+        map.scrollWheelZoom.disable();
 
-    var map = L.mapbox.map('map', MAPBOX_MAP_ID, {zoomControl: false});
-    map.dragging.disable();
-    map.touchZoom.disable();
-    map.doubleClickZoom.disable();
-    map.scrollWheelZoom.disable();
-
-    if (map.tap) {
-        map.tap.disable();
-    }
+        if (map.tap) {
+            map.tap.disable();
+        } 
+    };
+    
 
     // source: adapted from Click That Hood
-    // Finds the boundaries of the map containing geoData
-    function findBoundaries(geoData) {
+    // Finds the lat/lng boundaries of a map containing given geoData
+    var findBoundaries = function(geoData) {
 
         // TODO const
         var minLat = 99999999;
@@ -99,25 +120,33 @@ $(function() {
                 [maxLat, maxLon]];
     }
 
-    var loadData = function(callback) {
-        var url = 'data/san-francisco.geojson';
+    // loads JSON file with lat/lng/neighborhood combos for points to be selected from
+    var loadPointsData = function(success, error) {
+        var url = 'data/' + currentCity + '-points.json';
         $.ajax({
             dataType: 'json',
             url: url,
-            success: function(data) {
-                geoData = data;
-                callback(data);
+            success: function(pts) {
+                points = pts;
+                success(pts);
             },
-            error: function() {
-                    // TODO: handle this error
-                }
+            error: error
+        });
+    }
+
+    // loads geoJSON file with polygons representing neighborhoods
+    var loadNeighborhoodData = function(success, error) {
+        var url = 'data/' + currentCity + '.geojson';
+        $.ajax({
+            dataType: 'json',
+            url: url,
+            success: success,
+            error: error
             });
     }
 
-    loadData(function (data) {
+    var initializeNeighborhoodMapWithGeoJson = function(data) {
         boundaries = findBoundaries(data);
-
-        console.log(boundaries);
 
         var neighborhoodLayer = L.geoJson(data, {
             onEachFeature: function(feature, layer) {
@@ -142,11 +171,9 @@ $(function() {
                     var guessedNeighborhood = feature.properties.name;
 
                     if (guessedNeighborhood == correctNeighborhood) {
-                        alert("You got it! This is " + correctNeighborhood + ".")
-                        window.location.reload();
+                        handleCorrectGuess(guessedNeighborhood, correctNeighborhood);
                     } else {
-                        alert("Oops! It was " + correctNeighborhood + ", not " + guessedNeighborhood + ".");
-                        window.location.reload();
+                        handleInorrectGuess(guessedNeighborhood, correctNeighborhood);
                     }
                 });
             },
@@ -159,19 +186,17 @@ $(function() {
             }
         }).addTo(map);
         map.fitBounds(boundaries);
+    };
 
-    });
+    var handleCorrectGuess = function(guessedNeighborhood, correctNeighborhood) {
+        alert("You got it! This is " + correctNeighborhood + ".")
+        startNewRound();
+    };
 
-    correctNeighborhood = null;
-    sampleLocation = null;
-    // TODO: catch bad locations
-    var points = [];
-    $.get('data/sf_pts.json', function(pts) {
-        sampleLocation = pts[Math.floor(Math.random() * pts.length)];
-        correctNeighborhood = sampleLocation['neighborhood'];
-        console.log(sampleLocation);
-        loadStreetViewWithLatLng(sampleLocation['lat'], sampleLocation['lng']);
-    })
+    var handleInorrectGuess = function(guessedNeighborhood, correctNeighborhood) {
+        alert("Oops! It was " + correctNeighborhood + ", not " + guessedNeighborhood + ".");
+        startNewRound();
+    };
 
-
+    startGame();
 });
