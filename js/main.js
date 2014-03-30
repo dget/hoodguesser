@@ -16,12 +16,14 @@ $(function() {
         initializeMapBox();
         loadNeighborhoodData(initializeNeighborhoodMapWithGeoJson, logError);
         loadPointsData(startNewRound, logError);
+        mixpanel.track("Game Started");
     }
 
     var startNewRound = function () {
         locationToShow = points[Math.floor(Math.random() * points.length)];
         correctNeighborhood = locationToShow['neighborhood'];
         loadStreetViewWithLatLng(locationToShow['lat'], locationToShow['lng']);
+        mixpanel.track("New Round Started");
     }
 
 
@@ -189,11 +191,22 @@ $(function() {
     };
 
     var handleCorrectGuess = function(guessedNeighborhood, correctNeighborhood) {
+        mixpanel.track("Guess Made", 
+            {"city": currentCity, 
+             "correct": true, 
+             "guessedNeighborhood": guessedNeighborhood, 
+             "correctNeighborhood": correctNeighborhood
+            });
         alert("You got it! This is " + correctNeighborhood + ".")
         startNewRound();
     };
 
     var handleIncorrectGuess = function(guessedNeighborhood, correctNeighborhood) {
+        mixpanel.track("Guess Made", 
+            {"city": currentCity, 
+             "correct": false, 
+             "guessedNeighborhood": guessedNeighborhood, 
+             "correctNeighborhood": correctNeighborhood});
         alert("Oops! It was " + correctNeighborhood + ", not " + guessedNeighborhood + ".");
         startNewRound();
     };
