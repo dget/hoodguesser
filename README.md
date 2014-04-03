@@ -1,7 +1,7 @@
-Hood Guesser
+HoodGuesser
 ===========
 
-Hood Guesser is a fun web-based game that lets you explore the neighborhoods in your city. Get shown something in your city, and pick out the neighborhood it belongs to.
+HoodGuesser is a fun web-based game that lets you explore the neighborhoods in your city. Get shown something in your city, and pick out the neighborhood it belongs to.
 
 Dev Setup Instructions
 ---------------------

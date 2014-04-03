@@ -15,7 +15,7 @@ html, body {
 }
 
 #streetview {
-	background-color: chartreuse;
+	background-color: white;
 	height: 100%;
 	width: 60%;
 	float: left;
