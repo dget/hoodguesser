@@ -18,4 +18,4 @@ Contribute
 ----------
 If you have thoughts or questions, you're highly recommended to post an issue using the "Issues" tab at the top of the window. If you'd like, though, feel free to email us at longbeach@codeforamerica.org.
 
-In particular, if you'd like to see Hood Guesser in your city, post an issue and shoot us an email.
+In particular, if you'd like to see HoodGuesser in your city, post an issue and shoot us an email.
