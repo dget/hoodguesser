@@ -108,3 +108,22 @@ html, body {
 	box-shadow: 1px 1px 5px #fff;
 
 }
+
+.footer {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    height: 2em;
+    line-height: 2em;
+    text-align: center;
+    vertical-align: middle;
+    z-index: 999999;
+
+    background-color: white;
+}
+
+.cfa {
+    position: relative;
+    top: 5px;
+    margin-right: 8px;
+}
